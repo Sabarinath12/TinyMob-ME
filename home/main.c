@@ -9,7 +9,7 @@ static void open_calculator(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(current_window);
 
     // Launch the new process for the calculator
-    const char *calc_bin_path = "/home/sabarinath/faeture_phone/calculator/main";
+    const char *calc_bin_path = "/calculator/main";
 
     // Launch the calculator binary as a new process
     g_spawn_command_line_async(calc_bin_path, NULL);  // Assuming `main` is the executable
