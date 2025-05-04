@@ -51,7 +51,7 @@ static void on_swipe_to_unlock(GtkWidget *widget, gpointer data) {
     gtk_widget_hide(main_container);
 
     GError *error = NULL;
-    if (!g_spawn_command_line_async("/home/sabarinath/faeture_phone/home/main", &error)) {
+    if (!g_spawn_command_line_async("/home/main", &error)) {
         g_printerr("Failed to launch nav_home/main: %s\n", error->message);
         g_clear_error(&error);
     }
