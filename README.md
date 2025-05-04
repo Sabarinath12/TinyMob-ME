@@ -21,8 +21,7 @@ This project is a firmware-like operating system in the very early stages of dev
 
 
 ```bash
-  sudo gcc -o main main.c $(pkg-config --cflags --libs gtk-3.0) && ./main![calc](https://github.com/user-attachments/assets/586d2b6c-8ddf-423d-9dee-c1af6a8e8595)
-
+  sudo gcc -o main main.c $(pkg-config --cflags --libs gtk-3.0) && ./main
 
 ```
 
@@ -31,5 +30,5 @@ This project is a firmware-like operating system in the very early stages of dev
 
 
 
-![home](https://github.com/user-attachments/assets/208b0943-14d7-4de7-a3ad-b183e6e49df7)
+![home](https://github.com/user-attachments/assets/43-14d7-4de7-a3ad-b183e6e49df7)
 ![calc](https://github.com/user-attachments/assets/624da745-c810-48b8-95f4-4aa38ac4ab01)
