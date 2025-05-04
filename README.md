@@ -24,8 +24,9 @@ This project is a firmware-like operating system in the very early stages of dev
   sudo gcc -o main main.c $(pkg-config --cflags --libs gtk-3.0) && ./main![calc](https://github.com/user-attachments/assets/586d2b6c-8ddf-423d-9dee-c1af6a8e8595)
 
 
-```
+```![homescreen](https://github.com/user-attachments/assets/3c844fe3-d0ba-43f9-8193-928f73cb8795)
 
-![lockscreen](https://github.com/user-attachments/assets/826ba1b3-9524-49cc-924d-d38813971b33)
+
+
 ![home](https://github.com/user-attachments/assets/208b0943-14d7-4de7-a3ad-b183e6e49df7)
 ![calc](https://github.com/user-attachments/assets/624da745-c810-48b8-95f4-4aa38ac4ab01)
