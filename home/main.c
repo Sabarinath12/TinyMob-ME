@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 static void open_app(GtkWidget *widget, gpointer data) {
-    const char *app_name = gtk_button_get_label(GTK_BUTTON(widget));
+    const char *app_name = (const char *)g_object_get_data(G_OBJECT(widget), "app_name");
     GtkWidget *current_window = GTK_WIDGET(data);
     gtk_widget_destroy(current_window);
 
@@ -29,14 +29,10 @@ static void load_css(void) {
         "    background-color: #1a1a1a;"
         "}"
         "button {"
-        "    font-family: 'Inter', sans-serif;"
-        "    font-size: 18px;"
-        "    font-weight: 400;"
-        "    color: #e0e0e0;"
         "    background-color: #2d2d2d;"
         "    border: 1px solid #383838;"
         "    border-radius: 12px;"
-        "    padding: 20px;"
+        "    padding: 0;"
         "    margin: 8px;"
         "    transition: all 150ms ease;"
         "}"
@@ -49,16 +45,35 @@ static void load_css(void) {
         "    transform: scale(0.98);"
         "}"
         ".app-icon {"
-        "    font-size: 32px;"
-        "    margin-bottom: 8px;"
-        "}"
-        ".center-box {"
-        "    justify-content: center;"
-        "    align-items: center;"
+        "    min-width: 64px;"
+        "    min-height: 64px;"
+        "    background-size: contain;"
+        "    background-repeat: no-repeat;"
+        "    background-position: center;"
         "}";
 
     gtk_css_provider_load_from_data(provider, css, -1, NULL);
     g_object_unref(provider);
+}
+
+GtkWidget* create_app_button(const char *icon_path, const char *app_name, GtkWidget *window) {
+    GtkWidget *button = gtk_button_new();
+    GtkWidget *icon = gtk_image_new_from_file(icon_path);
+    
+    // Set the icon as the button content
+    gtk_container_add(GTK_CONTAINER(button), icon);
+    
+    // Store the app name with the button
+    g_object_set_data(G_OBJECT(button), "app_name", (gpointer)app_name);
+    
+    // Connect the click handler
+    g_signal_connect(button, "clicked", G_CALLBACK(open_app), window);
+    
+    // Apply CSS class
+    GtkStyleContext *context = gtk_widget_get_style_context(icon);
+    gtk_style_context_add_class(context, "app-icon");
+    
+    return button;
 }
 
 int main(int argc, char *argv[]) {
@@ -80,14 +95,14 @@ int main(int argc, char *argv[]) {
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
 
-    // Create app buttons with icons
+    // Create app buttons with transparent PNG icons 144x144px
     const char *apps[][2] = {
-        {"Calculator"},
-        {"Messages"},
-        {"Contacts"},
-        {"Settings"},
-        {"Calendar"},
-        {"Clock"}
+        {"/path/to/calculator.png", "Calculator"},
+        {"/path/to/messages.png", "Messages"},
+        {"/path/to/contacts.png", "Contacts"},
+        {"assets/set.png", "Settings"},
+        {"/path/to/calendar.png", "Calendar"},
+        {"/path/to/clock.png", "Clock"}
     };
 
     for (int i = 0; i < 3; i++) {
@@ -95,26 +110,7 @@ int main(int argc, char *argv[]) {
             int index = i * 2 + j;
             if (index >= 6) break;
 
-            GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-            gtk_widget_set_name(box, "center-box");  // Apply centering style
-            gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
-            gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
-            
-            GtkWidget *icon = gtk_label_new(apps[index][0]);
-            GtkWidget *label = gtk_label_new(apps[index][1]);
-            
-            // Center-align the labels
-            gtk_label_set_xalign(GTK_LABEL(icon), 0.5);
-            gtk_label_set_xalign(GTK_LABEL(label), 0.5);
-            
-            gtk_widget_set_name(icon, "app-icon");
-            gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 0);
-            gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
-            
-            GtkWidget *button = gtk_button_new();
-            gtk_container_add(GTK_CONTAINER(button), box);
-            
-            g_signal_connect(button, "clicked", G_CALLBACK(open_app), window);
+            GtkWidget *button = create_app_button(apps[index][0], apps[index][1], window);
             gtk_grid_attach(GTK_GRID(grid), button, j, i, 1, 1);
         }
     }
