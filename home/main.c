@@ -1,82 +1,123 @@
 #include <gtk/gtk.h>
-#include <stdlib.h>  // For system() or g_spawn_command_line_async()
-#include <unistd.h>  // For sleep()
+#include <stdlib.h>
+#include <unistd.h>
 
-// Callback to open Calculator window and run its binary
-static void open_calculator(GtkWidget *widget, gpointer data) {
-    // Close the current window
+static void open_app(GtkWidget *widget, gpointer data) {
+    const char *app_name = gtk_button_get_label(GTK_BUTTON(widget));
     GtkWidget *current_window = GTK_WIDGET(data);
     gtk_widget_destroy(current_window);
 
-    // Launch the new process for the calculator
-    const char *calc_bin_path = "/calculator/main";
-
-    // Launch the calculator binary as a new process
-    g_spawn_command_line_async(calc_bin_path, NULL);  // Assuming `main` is the executable
-
-    // Optionally, you can add error handling if the binary isn't found
-    // If you need to check for the process status, you can use g_spawn_async() for more control.
+    if (g_strcmp0(app_name, "Calculator") == 0) {
+        g_spawn_command_line_async("/calculator/main", NULL);
+    } else if (g_strcmp0(app_name, "Messages") == 0) {
+        g_spawn_command_line_async("/messages/main", NULL);
+    }
+    // Add other apps here
 }
 
-// Main function to create the home screen
+static void load_css(void) {
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GdkDisplay *display = gdk_display_get_default();
+    GdkScreen *screen = gdk_display_get_default_screen(display);
+    
+    gtk_style_context_add_provider_for_screen(screen,
+                                            GTK_STYLE_PROVIDER(provider),
+                                            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    const gchar *css = 
+        "window {"
+        "    background-color: #1a1a1a;"
+        "}"
+        "button {"
+        "    font-family: 'Inter', sans-serif;"
+        "    font-size: 18px;"
+        "    font-weight: 400;"
+        "    color: #e0e0e0;"
+        "    background-color: #2d2d2d;"
+        "    border: 1px solid #383838;"
+        "    border-radius: 12px;"
+        "    padding: 20px;"
+        "    margin: 8px;"
+        "    transition: all 150ms ease;"
+        "}"
+        "button:hover {"
+        "    background-color: #353535;"
+        "    box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
+        "}"
+        "button:active {"
+        "    background-color: #252525;"
+        "    transform: scale(0.98);"
+        "}"
+        ".app-icon {"
+        "    font-size: 32px;"
+        "    margin-bottom: 8px;"
+        "}"
+        ".center-box {"
+        "    justify-content: center;"
+        "    align-items: center;"
+        "}";
+
+    gtk_css_provider_load_from_data(provider, css, -1, NULL);
+    g_object_unref(provider);
+}
+
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
+    load_css();
 
-    // Create the window
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Home Screen");
-    gtk_window_set_default_size(GTK_WINDOW(window), 320, 480); // Feature phone screen size
+    gtk_window_set_default_size(GTK_WINDOW(window), 320, 480);
+    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     GtkWidget *grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(window), grid);
 
-    // Adjust grid to have a simple, spacious, and usable layout for a feature phone
+    // Configure grid layout
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10); // Add space between rows
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10); // Add space between columns
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
 
-    // Create a custom CSS for styling (we'll make buttons larger and more spaced out)
-    GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(css_provider,
-        "button {"
-        "   font-size: 20px;"
-        "   padding: 20px;"
-        "   width: 100px;"
-        "   height: 100px;"
-        "   text-align: center;"
-        "   background-color: orange;"   // Orange background for buttons
-        "   color: black;"               // Black text color
-        "   border-radius: 15px;"
-        "}"
-        "window {"
-        "   background-color: black;"   // Black background for the window
-        "}"
-        , -1, NULL);
-    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-        GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    // Create app buttons with icons
+    const char *apps[][2] = {
+        {"Calculator"},
+        {"Messages"},
+        {"Contacts"},
+        {"Settings"},
+        {"Calendar"},
+        {"Clock"}
+    };
 
-    // Buttons for the home screen
-    GtkWidget *calc_button = gtk_button_new_with_label("Calculator");
-    g_signal_connect(calc_button, "clicked", G_CALLBACK(open_calculator), window);  // Pass the current window
-    gtk_grid_attach(GTK_GRID(grid), calc_button, 0, 0, 1, 1);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+            int index = i * 2 + j;
+            if (index >= 6) break;
 
-    GtkWidget *message_button = gtk_button_new_with_label("Messages");
-    gtk_grid_attach(GTK_GRID(grid), message_button, 1, 0, 1, 1);
-
-    GtkWidget *contacts_button = gtk_button_new_with_label("Contacts");
-    gtk_grid_attach(GTK_GRID(grid), contacts_button, 0, 1, 1, 1);
-
-    GtkWidget *settings_button = gtk_button_new_with_label("Settings");
-    gtk_grid_attach(GTK_GRID(grid), settings_button, 1, 1, 1, 1);
-
-    // Add more buttons if needed
-    GtkWidget *calendar_button = gtk_button_new_with_label("Calendar");
-    gtk_grid_attach(GTK_GRID(grid), calendar_button, 0, 2, 1, 1);
-
-    GtkWidget *clock_button = gtk_button_new_with_label("Clock");
-    gtk_grid_attach(GTK_GRID(grid), clock_button, 1, 2, 1, 1);
+            GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+            gtk_widget_set_name(box, "center-box");  // Apply centering style
+            gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+            gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
+            
+            GtkWidget *icon = gtk_label_new(apps[index][0]);
+            GtkWidget *label = gtk_label_new(apps[index][1]);
+            
+            // Center-align the labels
+            gtk_label_set_xalign(GTK_LABEL(icon), 0.5);
+            gtk_label_set_xalign(GTK_LABEL(label), 0.5);
+            
+            gtk_widget_set_name(icon, "app-icon");
+            gtk_box_pack_start(GTK_BOX(box), icon, FALSE, FALSE, 0);
+            gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+            
+            GtkWidget *button = gtk_button_new();
+            gtk_container_add(GTK_CONTAINER(button), box);
+            
+            g_signal_connect(button, "clicked", G_CALLBACK(open_app), window);
+            gtk_grid_attach(GTK_GRID(grid), button, j, i, 1, 1);
+        }
+    }
 
     gtk_widget_show_all(window);
     gtk_main();
