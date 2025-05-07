@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <ctype.h>
+#include <math.h>
 
 static GtkWidget *entry;
 
@@ -7,47 +8,114 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
     const char *text = gtk_button_get_label(GTK_BUTTON(widget));
     const char *current_text = gtk_entry_get_text(GTK_ENTRY(entry));
 
-    // If "=" is clicked, evaluate the expression
     if (g_strcmp0(text, "=") == 0) {
+        // Simple evaluation (note: this is not a safe eval - for demo only)
         double result = 0;
-        sscanf(current_text, "%lf", &result);
-        char result_text[512];
-        snprintf(result_text, sizeof(result_text), "%f", result);
-        gtk_entry_set_text(GTK_ENTRY(entry), result_text);
+        char expression[256];
+        snprintf(expression, sizeof(expression), "echo \"%s\" | bc -l", current_text);
+        
+        FILE *fp = popen(expression, "r");
+        if (fp) {
+            fscanf(fp, "%lf", &result);
+            pclose(fp);
+            
+            char result_text[256];
+            snprintf(result_text, sizeof(result_text), "%g", result);
+            gtk_entry_set_text(GTK_ENTRY(entry), result_text);
+        }
     }
-    // If "C" is clicked, clear the entry field
     else if (g_strcmp0(text, "C") == 0) {
         gtk_entry_set_text(GTK_ENTRY(entry), "");
     }
     else {
-        // Check if the input is valid: only numbers and operators are allowed
-        if (isdigit(text[0]) || g_strcmp0(text, "+") == 0 || g_strcmp0(text, "-") == 0 ||
-            g_strcmp0(text, "*") == 0 || g_strcmp0(text, "/") == 0) {
-
-            // Append the clicked button text to the entry
-            char new_text[256];
-            snprintf(new_text, sizeof(new_text), "%s%s", current_text, text);
-            gtk_entry_set_text(GTK_ENTRY(entry), new_text);
-        }
+        char new_text[256];
+        snprintf(new_text, sizeof(new_text), "%s%s", current_text, text);
+        gtk_entry_set_text(GTK_ENTRY(entry), new_text);
     }
+}
+
+static void load_css(void) {
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GdkDisplay *display = gdk_display_get_default();
+    GdkScreen *screen = gdk_display_get_default_screen(display);
+    
+    gtk_style_context_add_provider_for_screen(screen,
+                                             GTK_STYLE_PROVIDER(provider),
+                                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    const gchar *css = 
+        "window {"
+        "    background-color: #232526;"
+        "}"
+        "entry {"
+        "    font-family: 'Inter', sans-serif;"
+        "    font-size: 32px;"
+        "    font-weight: 300;"
+        "    color: white;"
+        "    background-color: #2a2a2a;"
+        "    border: 1px solid #404040;"
+        "    padding: 20px;"
+        "    margin-bottom: 10px;"
+        "}"
+        "button {"
+        "    font-family: 'Inter', sans-serif;"
+        "    font-size: 24px;"
+        "    font-weight: 400;"
+        "    color: white;"
+        "    border-radius: 8px;"
+        "    border: none;"
+        "    padding: 20px;"
+        "    transition: all 100ms ease;"
+        "}"
+        "button.number {"
+        "    background-color: #2a2a2a;"
+        "    border: 1px solid #404040;"
+        "}"
+        "button.number:hover {"
+        "    background-color: #363636;"
+        "}"
+        "button.operator {"
+        "    background-color: #2a6bff;"
+        "}"
+        "button.operator:hover {"
+        "    background-color: #387aff;"
+        "}"
+        "button.clear {"
+        "    background-color: #ff3b30;"
+        "}"
+        "button.clear:hover {"
+        "    background-color: #ff5a50;"
+        "}"
+        "button.equals {"
+        "    background-color: #2dd36f;"
+        "}"
+        "button.equals:hover {"
+        "    background-color: #3ae456;"
+        "}";
+
+    gtk_css_provider_load_from_data(provider, css, -1, NULL);
+    g_object_unref(provider);
 }
 
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
+    load_css();
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Calculator");
-    gtk_window_set_default_size(GTK_WINDOW(window), 320, 480);  // Set size to match the home screen size
+    gtk_window_set_default_size(GTK_WINDOW(window), 320, 480);
+    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     GtkWidget *grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(window), grid);
 
-    // Entry for calculator display
+    // Calculator display
     entry = gtk_entry_new();
+    gtk_entry_set_alignment(GTK_ENTRY(entry), 1.0); // Right aligned
     gtk_grid_attach(GTK_GRID(grid), entry, 0, 0, 4, 1);
 
-    // Define button labels
+    // Button layout
     const char *buttons[5][4] = {
         {"7", "8", "9", "/"},
         {"4", "5", "6", "*"},
@@ -55,44 +123,35 @@ int main(int argc, char *argv[]) {
         {"C", "0", "=", "+"}
     };
 
-    // Add buttons to grid
+    // Create buttons with appropriate CSS classes
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             GtkWidget *button = gtk_button_new_with_label(buttons[i][j]);
             g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), NULL);
 
-            // Set button properties to expand and fill the space
-            gtk_widget_set_halign(button, GTK_ALIGN_FILL);
-            gtk_widget_set_valign(button, GTK_ALIGN_FILL);
+            // Set CSS classes based on button type
+            if (isdigit(buttons[i][j][0]) || g_strcmp0(buttons[i][j], "0") == 0) {
+                gtk_style_context_add_class(gtk_widget_get_style_context(button), "number");
+            } 
+            else if (g_strcmp0(buttons[i][j], "C") == 0) {
+                gtk_style_context_add_class(gtk_widget_get_style_context(button), "clear");
+            }
+            else if (g_strcmp0(buttons[i][j], "=") == 0) {
+                gtk_style_context_add_class(gtk_widget_get_style_context(button), "equals");
+            }
+            else {
+                gtk_style_context_add_class(gtk_widget_get_style_context(button), "operator");
+            }
+
             gtk_grid_attach(GTK_GRID(grid), button, j, i + 1, 1, 1);
         }
     }
 
-    // Adjust the grid properties to ensure it looks good on a feature phone display
+    // Grid configuration
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 5); // Space between rows
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 5); // Space between columns
-
-    // Create and apply custom CSS for styling (larger buttons, more spacing)
-    GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(css_provider,
-        "button {"
-        "   font-size: 18px;"
-        "   padding: 15px;"
-        "   width: 60px;"
-        "   height: 60px;"
-        "   text-align: center;"
-        "   background-color: orange;"   // Orange background for buttons
-        "   color: black;"               // Black text color
-        "   border-radius: 10px;"
-        "}"
-        "window {"
-        "   background-color: black;"   // Black background for the window
-        "}"
-        , -1, NULL);
-    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-        GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 8);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 8);
 
     gtk_widget_show_all(window);
     gtk_main();
