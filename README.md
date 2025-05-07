@@ -35,6 +35,6 @@ This project is a firmware-like operating system in the very early stages of dev
 
 ![home_v2](https://github.com/user-attachments/assets/0a39db26-5d89-4178-bd23-1333ff69ff47)
 
-![calc](https://github.com/user-attachments/assets/66cad04f-a864-4fa2-9baa-5ca5d1cd0967)
+
 
 
