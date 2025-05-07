@@ -32,5 +32,6 @@ This project is a firmware-like operating system in the very early stages of dev
 
 ![lockscreen](https://github.com/user-attachments/assets/6fdbc13d-c1f5-4bed-b88e-3e18214b06d1)
 
-![calc](https://github.com/user-attachments/assets/624da745-c810-48b8-95f4-4aa38ac4ab01)
+![calc](https://github.com/user-attachments/assets/66cad04f-a864-4fa2-9baa-5ca5d1cd0967)
+
 
