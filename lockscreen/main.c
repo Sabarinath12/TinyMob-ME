@@ -133,9 +133,9 @@ int main(int argc, char *argv[]) {
     main_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(window), main_container);
 
-    // iOS-style Status Bar
+    // style Status Bar
     GtkWidget *status_bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(status_bar, "ios-status-bar");
+    gtk_widget_set_name(status_bar);
     gtk_box_pack_start(GTK_BOX(main_container), status_bar, FALSE, FALSE, 0);
     
     // Left side: Signal dots and Carrier
