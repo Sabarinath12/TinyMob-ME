@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *signal_dots = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
     gtk_widget_set_name(signal_dots, "signal-dots");
     
-    // Add 5 signal dots (iOS-style)
+    // Add 5 signal dots
     for(int i = 0; i < 5; i++) {
         GtkWidget *dot = gtk_label_new("");
         gtk_widget_set_size_request(dot, 6, 6);
