@@ -18,20 +18,6 @@ The core goal of the project is to create a minimal, distraction-free OS that he
 
 
 
-    
-## To compile 
-
-
-
-```bash
-  sudo gcc -o main main.c $(pkg-config --cflags --libs gtk-3.0) && ./main
-
-```
-
-
-
-
-
 
 ![lockscreen](https://github.com/user-attachments/assets/6fdbc13d-c1f5-4bed-b88e-3e18214b06d1)
 
