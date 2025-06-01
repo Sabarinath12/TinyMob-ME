@@ -1,8 +1,8 @@
 TinyMob OS 
 
 
-TinyMob OS is a lightweight operating system in its early stages of development, built using C and GTK for maximum efficiency. It runs on top of the FreeBSD base with X11 as the display server, and is designed specifically for touch-based feature phones and low-resource devices.
-The core goal of the project is to create a minimal, distraction-free OS that helps users stay focused. With a strict no-bloat philosophy, TinyMob OS includes only essential components to deliver a fast, clean, and straightforward user experience — ideal for productivity and simplicity.
+TinyMob OS is a lightweight mobile environment in its early stages of development, built using C and GTK for maximum efficiency. It runs on top of the Linux/FreeBSD/Netbsd base with X11 as the display server, and is designed specifically for touch-based feature phones and low-resource devices.
+The core goal of the project is to create a minimal, distraction-free OS that helps users stay focused. With a strict no-bloat philosophy, TinyMob-ME includes only essential components to deliver a fast, clean, and straightforward user experience — ideal for productivity and simplicity.
 
 
 
