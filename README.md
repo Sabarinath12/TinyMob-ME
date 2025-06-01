@@ -21,7 +21,7 @@ The core goal of the project is to create a minimal, distraction-free ui that he
 
 ![lockscreen](https://github.com/user-attachments/assets/6fdbc13d-c1f5-4bed-b88e-3e18214b06d1)
 
-![home](https://github.com/user-attachments/assets/507a5f0b-b82c-4f80-b05c-2526ffe93064)
+
 
 
 
